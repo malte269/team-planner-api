@@ -1,0 +1,52 @@
+variables:
+  IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  IMAGE_LATEST: $CI_REGISTRY_IMAGE:latest
+  STACK_DEV: malte-bachelor-bachelor1
+  SERVICE_NAME: api
+
+# -- build --
+
+build:
+  stage: build
+  needs: []
+  tags:
+    - 28isabella
+  script:
+    - export DOCKER_BUILDKIT=0
+    - export COMPOSE_DOCKER_CLI_BUILD=0
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build -t $IMAGE .
+    - docker push $IMAGE
+
+tag-latest:
+  stage: build
+  tags:
+    - dind
+  needs: [build]
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $IMAGE
+    - docker tag $IMAGE $IMAGE_LATEST
+    - docker push $IMAGE_LATEST
+  only:
+    - tags
+
+# -- deploy --
+
+.deploy:
+  stage: deploy
+  needs: [build]
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker service update --image $IMAGE --with-registry-auth $STACK_SERVICE
+
+deploy-dev:
+  extends: .deploy
+  tags: [28dev2]
+  before_script:
+    - export STACK_SERVICE=${STACK_DEV}_${SERVICE_NAME}
+  environment:
+    name: $CI_COMMIT_REF_SLUG
+    url: https://api.malte-bachelor.team-planner.dev2.28apps-software.de
+  only:
+    - master

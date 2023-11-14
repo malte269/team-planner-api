@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+
+  #api:
+  #  image: req.28apps-software.de/...
+  #  environment:
+  #    MAIL_HOST: $MAIL_TEST_HOST
+  #    MAIL_PORT: $MAIL_TEST_PORT
+  #    MAIL_USER: $MAIL_TEST_USER
+  #    MAIL_PASS: $MAIL_TEST_PASSWORD
+  #    MAIL_FROM: $MAIL_TEST_USER
+
+  db:
+    env_file: .env
+    image: mysql:8
+    volumes:
+      - db:/var/lib/mysql
+    ports:
+      - '3317:3306'
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    ports:
+      - '8093:80'
+
+volumes:
+  db:
