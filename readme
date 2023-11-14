@@ -1,4 +1,5 @@
-# Generating Pblic and Provate Key
+# Generating Public and Private Key
+
 ```bash
 # Generate a private key (prime256v1 is the name of the parameters used
 # to generate the key, this is the same as P-256 in the JWA spec).
